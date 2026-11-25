@@ -1,0 +1,70 @@
+.formation-guide {
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: 38px clamp(16px, 4vw, 42px) 56px;
+  color: #e8edf4;
+}
+.guide-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 30px 32px;
+  color: #eef2f7;
+  background: #101720;
+  border: 1px solid #263242;
+  border-radius: 12px;
+}
+.guide-kicker { color: #b3d54a !important; font-size: 11px !important; font-weight: 800 !important; letter-spacing: 1.5px !important; }
+.guide-heading h3 { margin: 4px 0 8px; color: #eef2f7; font-size: clamp(30px, 5vw, 48px); font-weight: 750; }
+.guide-lead { color: #aab7c8; font-size: 16px !important; }
+.guide-heading .MuiButton-root, .guide-back-bottom.MuiButton-root {
+  color: #d0d9e4;
+  border-color: #52623a;
+  text-transform: none;
+  white-space: nowrap;
+}
+.guide-featured {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 18px 0;
+  padding: 18px 22px;
+  color: #e8edf4 !important;
+  background: #141d29 !important;
+  border: 1px solid #3b4b35;
+  border-radius: 10px !important;
+}
+.guide-featured .formation-mark { flex: 0 0 86px; }
+.guide-featured h5 { margin: 3px 0 5px; color: #eef2f7; }
+.guide-featured p { color: #c3cedb; }
+.guide-advantage { margin-top: 8px !important; }
+.formation-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+.formation-card {
+  min-height: 270px;
+  padding: 17px;
+  color: #e8edf4 !important;
+  background: #101720 !important;
+  border: 1px solid #263242;
+  border-radius: 10px !important;
+  transition: border-color 140ms ease, transform 140ms ease;
+}
+.formation-card:hover { border-color: #99b542; transform: translateY(-2px); }
+.formation-card.selected { border-color: #b3d54a; }
+.formation-card-top { display: flex; align-items: center; justify-content: space-between; height: 74px; margin-bottom: 8px; }
+.formation-number { color: #b3d54a; font-size: 13px; font-weight: 800; }
+.formation-mark { width: 72px; height: 72px; color: #a9cb45; }
+.formation-card h6 { margin-bottom: 7px; color: #eef2f7; font-size: 18px; font-weight: 700; }
+.formation-look, .formation-advantage { color: #bdc8d6 !important; font-size: 13px !important; line-height: 1.55 !important; }
+.formation-advantage { margin-top: 11px !important; }
+.formation-advantage strong { color: #d5e69b; }
+.guide-back-bottom.MuiButton-root { margin-top: 20px; color: #172014; background: #b3d54a; border: 0; font-weight: 700; }
+.guide-back-bottom.MuiButton-root:hover { background: #c6e45e; }
+@media (max-width: 850px) { .formation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 620px) {
+  .guide-heading { align-items: flex-start; flex-direction: column; padding: 22px; }
+  .guide-heading .MuiButton-root { white-space: normal; }
+  .formation-grid { grid-template-columns: 1fr; }
+  .guide-featured { align-items: flex-start; }
+  .guide-featured .formation-mark { flex-basis: 64px; width: 64px; height: 64px; }
+}

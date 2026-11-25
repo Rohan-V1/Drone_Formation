@@ -1,5 +1,7 @@
 # Real video analysis
 
+> Scope update: the current React application is intentionally image-only. The video endpoint and this historical pipeline documentation remain in the repository as preserved implementation, but video analysis is not linked from the current user interface.
+
 ## Runtime path
 
 The React page **Real Video Analysis** uploads the selected video as a streamed raw request to Express (`POST /api/analyze`). Express forwards the byte stream to FastAPI. FastAPI saves the upload into a unique job directory, validates it with OpenCV, then reads frames sequentially. A new Ultralytics YOLO instance per job runs the local `C:\DroneTrainingRuns\phase3h_resume02\weights\best.pt` checkpoint with ByteTrack. Detection records use original frame coordinates. Annotated MP4, detections CSV, formation windows CSV, and metadata JSON are served through an allowlisted backend route.

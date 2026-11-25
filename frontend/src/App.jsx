@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-import { AppBar, Box, Chip, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, Chip, CssBaseline, Toolbar, Typography } from "@mui/material";
 import { CircleRounded, RadarRounded } from "@mui/icons-material";
 import AnalyzerPage from "./AnalyzerPage";
+import FormationGuide from "./FormationGuide";
 import "./App.css";
 
 const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
 export default function App() {
   const [connectionStatus, setConnectionStatus] = useState("checking");
+  const [page, setPage] = useState(window.location.pathname === "/formations" ? "guide" : "analysis");
+  const [selectedFormation, setSelectedFormation] = useState("");
+
+  const navigate = (nextPage, formation = "") => {
+    const path = nextPage === "guide" ? "/formations" : "/";
+    window.history.pushState({}, "", path);
+    setSelectedFormation(formation);
+    setPage(nextPage);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
 
   useEffect(() => {
     let active = true;
@@ -26,6 +37,12 @@ export default function App() {
     return () => { active = false; clearInterval(timer); };
   }, []);
 
+  useEffect(() => {
+    const syncPage = () => setPage(window.location.pathname === "/formations" ? "guide" : "analysis");
+    window.addEventListener("popstate", syncPage);
+    return () => window.removeEventListener("popstate", syncPage);
+  }, []);
+
   const statusLabel = {
     checking: "Checking services…",
     connected: "AI service connected",
@@ -41,18 +58,20 @@ export default function App() {
           <Box className="analyzer-brand">
             <RadarRounded />
             <Box>
-              <Typography className="analyzer-brand-title">Drone Formation Analyzer</Typography>
-              <Typography className="analyzer-brand-caption">REAL MEDIA ANALYSIS</Typography>
+              <Typography className="analyzer-brand-title">Drone Formation</Typography>
             </Box>
           </Box>
           <Box className="analyzer-nav">
-            <Chip label="Real image & video" variant="outlined" className="mode-chip" />
+            <Button className="header-link" onClick={() => navigate("analysis")}>Image analysis</Button>
+            <Button className="header-link" onClick={() => navigate("guide", selectedFormation)}>Formation guide</Button>
             <Chip icon={<CircleRounded />} label={statusLabel} className={`connection-chip ${connectionStatus}`} />
           </Box>
         </Toolbar>
       </AppBar>
       <Box component="main" className="analyzer-main">
-        <AnalyzerPage />
+        {page === "guide"
+          ? <FormationGuide currentFormation={selectedFormation} onBack={() => navigate("analysis")} />
+          : <AnalyzerPage onOpenFormationGuide={(formation) => navigate("guide", formation)} />}
       </Box>
     </Box>
   );

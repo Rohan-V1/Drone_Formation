@@ -1,10 +1,11 @@
 """Interpretable shape classifier for unordered 2D image-center points.
 
 The classifier is deliberately conservative. It recognizes canonical V,
-four-corner diamond/box, and ring/circle geometry. It rejects collinear arrays:
-without a flight-heading reference, echelon, column/file, and line/abreast can
-have identical 2D point geometry, so assigning one of those labels would be a
-guess. This is a geometric prototype, not a trained or calibrated classifier.
+four-corner diamond/box, ring/circle, and multi-row geometry. Collinear arrays
+receive image-axis layout labels only; a still image cannot establish flight
+heading. When a set fits both a canonical shape and the multi-row heuristic,
+the stronger spatial fit takes precedence. This is a geometric prototype,
+not a trained or calibrated classifier.
 """
 
 from __future__ import annotations
@@ -188,13 +189,6 @@ def classify_image(points) -> Classification:
     if len(p) < 4:
         return Classification("Unknown", 0.0, len(p), "sparse: need at least 4 distinct positions", {})
 
-    multi = _multirow_line(p)
-    if multi is not None:
-        quality, rows = multi
-        return Classification("Line Formation (Multi-row)", quality, len(p),
-                              f"{rows} repeated image-space rows were detected; this does not establish flight direction",
-                              {"multirow_quality": quality, "row_count": rows})
-
     centered = p - p.mean(axis=0, keepdims=True)
     eigenvalues, eigenvectors = np.linalg.eigh(np.cov(centered.T))
     major = eigenvectors[:, int(np.argmax(eigenvalues))]
@@ -247,6 +241,19 @@ def classify_image(points) -> Classification:
         return Classification("Circle/Ring formation", base.quality, len(p),
                               "image-space ring candidate; projection and missed detections may affect the fit",
                               base.candidate_scores)
+
+    # Evaluate canonical shapes before the multi-row heuristic. A V can form
+    # several bands when its arms are projected onto the minor PCA axis, so
+    # treating row count first systematically stole clear V cases.
+    # Keep multi-row only when its fit is strong and beats a competing
+    # canonical template by a clear margin.
+    multi = _multirow_line(p)
+    if multi is not None:
+        quality, rows = multi
+        if quality >= 0.65 and (base.label == "Unknown" or quality >= base.quality + 0.12):
+            return Classification("Line Formation (Multi-row)", quality, len(p),
+                                  f"{rows} repeated image-space rows were detected; this does not establish flight direction",
+                                  {"multirow_quality": quality, "row_count": rows})
     if base.label != "Unknown":
         return base
     return base

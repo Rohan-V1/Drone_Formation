@@ -23,7 +23,7 @@ IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"}
 IMAGE_DUPLICATE_IOU_MIN = 0.50
 IMAGE_DUPLICATE_SMALLER_BOX_COVERAGE_MIN = 0.85
 IMAGE_DUPLICATE_CENTER_DIAGONAL_RATIO_MAX = 0.20
-IMAGE_GEOMETRY_VERSION = "chart_12_image_geometry_v1"
+IMAGE_GEOMETRY_VERSION = "chart_12_image_geometry_v2"
 VIDEO_GEOMETRY_VERSION = "camera_compensated_temporal_v1"
 
 app = FastAPI(title="Drone Formation Identification AI Service", version="0.3.0")
@@ -207,7 +207,6 @@ def _process_image(source_path: Path, job_dir: Path, filename: str, job_id: str)
     detection_rows = []
     boxes_xyxy = []
     confidences = []
-    colors = [(50, 220, 170), (255, 160, 60), (80, 190, 255), (210, 100, 255), (80, 230, 255), (255, 100, 120)]
     if boxes is not None:
         for index, (coords, conf, cls) in enumerate(zip(boxes.xyxy.cpu().tolist(), boxes.conf.cpu().tolist(), boxes.cls.int().cpu().tolist())):
             if int(cls) != 0:
@@ -236,25 +235,13 @@ def _process_image(source_path: Path, job_dir: Path, filename: str, job_id: str)
     box_points = [((box[0] + box[2]) / (2 * width), (box[1] + box[3]) / (2 * height))
                   for box in distinct_boxes]
 
-    # Draw only retained boxes so a duplicate pair does not produce a stack of
-    # indistinguishable rectangles and labels. Raw detections remain in the CSV.
-    font_scale = max(0.40, min(0.52, min(width, height) / 600.0))
+    # Draw only retained boxes. Confidence text over tiny, crowded drones made
+    # the image unreadable; exact IDs and confidences remain available in CSV.
     box_line_width = max(1, round(min(width, height) / 500.0))
-    text_thickness = max(1, round(min(width, height) / 900.0))
-    for distinct_id, raw_index in enumerate(kept_indices, start=1):
+    box_color = (70, 235, 170)
+    for raw_index in kept_indices:
         x1, y1, x2, y2 = boxes_xyxy[raw_index]
-        color = colors[(distinct_id - 1) % len(colors)]
-        cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color, box_line_width)
-        label = f"D{distinct_id} {confidences[raw_index]:.2f}"
-        (text_w, text_h), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, text_thickness)
-        label_x = max(0, min(width - text_w - 6, int(x1)))
-        label_y = int(y1) - 4
-        if label_y - text_h - baseline < 0:
-            label_y = min(height - baseline - 2, int(y2) + text_h + baseline + 4)
-        top = max(0, label_y - text_h - baseline - 3)
-        cv2.rectangle(image, (label_x, top), (min(width - 1, label_x + text_w + 6), min(height - 1, label_y + 2)), color, -1)
-        cv2.putText(image, label, (label_x + 3, label_y - baseline),
-                    cv2.FONT_HERSHEY_SIMPLEX, font_scale, (8, 18, 26), text_thickness, cv2.LINE_AA)
+        cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), box_color, box_line_width)
     annotated_path = job_dir / "annotated.png"
     if not cv2.imwrite(str(annotated_path), image):
         raise RuntimeError("OpenCV failed to save the annotated image.")
@@ -277,6 +264,7 @@ def _process_image(source_path: Path, job_dir: Path, filename: str, job_id: str)
                 "detections": detection_rows[:200], "cleaned_detections": distinct_rows[:200],
                 "detections_truncated": len(detection_rows) > 200,
                 "tracking": "not applicable to a single image",
+                "annotation_render_policy": "retained boxes only; confidence and IDs are in detections.csv to avoid label clutter",
                 "formation_prediction": formation["label"],
                 "formation_reason": formation["reason"],
                 "image_geometry_version": IMAGE_GEOMETRY_VERSION,
@@ -383,6 +371,13 @@ def _assess_image_formation(points, boxes_xyxy, classify, confidences=None):
             li, ri = left - 1, right - 1
             # Stable tie break: keep the earlier detector record.
             excluded.add(li if confidences[li] < confidences[ri] else ri)
+    elif overlap_pairs:
+        return {"label": "Unknown",
+                "reason": "overlapping detections cannot be resolved without per-box confidence values.",
+                "candidate_scores": {}, "quality": 0.0,
+                "num_positions": len(set(map(tuple, points))),
+                "positions_excluded_for_overlap": 0,
+                "overlapping_detection_pairs": overlap_pairs}
     usable_points = [point for index, point in enumerate(points) if index not in excluded]
     if len(set(map(tuple, usable_points))) < 4:
         return {"label": "Unknown", "reason": "too few unambiguous drone positions remain after overlap review.",

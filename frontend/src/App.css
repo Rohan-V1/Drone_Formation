@@ -1,28 +1,30 @@
 :root {
   font-family: Inter, "Segoe UI", Arial, sans-serif;
-  color: #e5edf8;
-  background: #0b1220;
+  color: #e8edf4;
+  background: #080c12;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 320px; min-height: 100vh; background: #0b1220; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #080c12; }
 #root { min-height: 100vh; }
-.app-shell { min-height: 100vh; background: #0b1220; }
-.analyzer-topbar { background: #0e1726 !important; border-bottom: 1px solid #202b3b; }
+.app-shell { min-height: 100vh; background: #080c12; }
+.analyzer-topbar { background: #0c1119 !important; border-bottom: 1px solid #202a36; }
 .analyzer-toolbar { min-height: 76px !important; padding: 10px clamp(14px, 4vw, 42px) !important; display: flex; justify-content: space-between; gap: 20px; }
-.analyzer-brand { display: flex; align-items: center; gap: 12px; color: #72e0c8; }
+.analyzer-brand { display: flex; align-items: center; gap: 12px; color: #b3d54a; }
 .analyzer-brand > svg { font-size: 32px; }
-.analyzer-brand-title { color: #edf3fc; font-size: 18px !important; font-weight: 700 !important; }
+.analyzer-brand-title { color: #eef2f7; font-size: 18px !important; font-weight: 700 !important; }
 .analyzer-brand-caption { margin-top: 2px !important; color: #8394aa; font-size: 9px !important; font-weight: 700 !important; letter-spacing: 1.5px !important; }
 .analyzer-nav { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .analyzer-nav .MuiButton-root { text-transform: none; }
-.analyzer-nav .MuiButton-contained { color: #071c1b; background: #6adcc2; box-shadow: none; }
-.analyzer-nav .MuiButton-contained:hover { background: #8ae8d2; box-shadow: none; }
-.connection-chip { color: #78d9be !important; background: #16342f !important; border: 1px solid #28574c !important; font-size: 10px !important; }
-.connection-chip .MuiChip-icon { color: #66d9b7; font-size: 9px; }
+.analyzer-nav .MuiButton-contained { color: #172014; background: #b3d54a; box-shadow: none; }
+.analyzer-nav .MuiButton-contained:hover { background: #c6e45e; box-shadow: none; }
+.analyzer-nav .header-link { color: #d0d8e2; font-size: 14px; }
+.analyzer-nav .header-link:hover { color: #c6e45e; background: #1a222d; }
+.connection-chip { color: #cfe18e !important; background: #202817 !important; border: 1px solid #46532c !important; font-size: 10px !important; }
+.connection-chip .MuiChip-icon { color: #b3d54a; font-size: 9px; }
 .connection-chip.degraded { color: #f2b777 !important; background: #362817 !important; border-color: #74562e !important; }
 .connection-chip.degraded .MuiChip-icon { color: #f2b777; }
 .connection-chip.disconnected { color: #ff9a9a !important; background: #381d26 !important; border-color: #73404b !important; }
