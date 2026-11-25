@@ -1,0 +1,58 @@
+.analyzer-page {
+  display: grid;
+  gap: 18px;
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: 28px clamp(16px, 4vw, 40px) 24px;
+  color: #e5edf8;
+}
+.analyzer-intro { display: grid; gap: 5px; }
+.analyzer-intro .MuiTypography-h5 { color: #edf3fc; font-weight: 700; }
+.analyzer-subtitle { color: #9eafc4 !important; font-size: 13px !important; line-height: 1.55 !important; }
+.analyzer-upload-card {
+  display: flex;
+  min-height: 230px;
+  padding: 30px 18px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #e5edf8 !important;
+  background: #111c2c !important;
+  border: 1px dashed #496078;
+  border-radius: 14px !important;
+  text-align: center;
+}
+.analyzer-upload-card:hover { border-color: #65d9c0; }
+.analyzer-upload-card .MuiTypography-h6 { font-size: 17px; }
+.analyzer-upload-icon { color: #72e0c8; font-size: 36px !important; }
+.analyzer-file-input { display: none; }
+.analyzer-media-card, .analyzer-result-card, .analyzer-status-card {
+  padding: 18px;
+  color: #e5edf8 !important;
+  background: #111c2c !important;
+  border: 1px solid #263449;
+  border-radius: 12px !important;
+}
+.analyzer-media-heading, .analyzer-result-title { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.analyzer-media-heading > div:first-child { overflow-wrap: anywhere; }
+.analyzer-preview, .analyzer-output {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 720px);
+  object-fit: contain;
+  background: #05080d;
+}
+.analyzer-status-card { display: flex; align-items: center; gap: 14px; }
+.analyzer-summary-grid { display: grid; grid-template-columns: minmax(180px, .7fr) minmax(0, 1.3fr); gap: 14px; margin: 16px 0; }
+.analyzer-summary-item { padding: 16px; background: #162235; border: 1px solid #29374b; border-radius: 10px; }
+.analyzer-summary-item .MuiTypography-h4, .analyzer-summary-item .MuiTypography-h6 { margin: 6px 0; color: #edf3fc; }
+.analyzer-summary-label { color: #91a3b9 !important; font-size: 10px !important; font-weight: 700 !important; letter-spacing: 1px !important; }
+.analyzer-secondary-download { margin-top: 10px !important; }
+.analyzer-footnote { color: #8798ae !important; font-size: 12px !important; line-height: 1.55 !important; }
+.analyzer-reset { justify-self: start; }
+@media (max-width: 680px) {
+  .analyzer-media-heading, .analyzer-result-title { align-items: stretch; flex-direction: column; }
+  .analyzer-media-heading .MuiStack-root { flex-wrap: wrap; }
+  .analyzer-summary-grid { grid-template-columns: 1fr; }
+}

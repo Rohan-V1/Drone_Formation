@@ -11,3 +11,4 @@ models/*.pt
 outputs/
 experiments/
 .vscode/
+.venv311/

@@ -1,261 +1,59 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  AppBar,
-  Box,
-  Button,
-  Chip,
-  CssBaseline,
-  Drawer,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import {
-  DashboardRounded,
-  VideocamRounded,
-  RadarRounded,
-  AnalyticsRounded,
-  SettingsRounded,
-  MenuRounded,
-  CloudUploadRounded,
-  CircleRounded,
-  GroupsRounded,
-  TimelineRounded,
-} from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { AppBar, Box, Chip, CssBaseline, Toolbar, Typography } from "@mui/material";
+import { CircleRounded, RadarRounded } from "@mui/icons-material";
+import AnalyzerPage from "./AnalyzerPage";
 import "./App.css";
 
-const drawerWidth = 250;
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:5000";
 
-const navigation = [
-  { label: "Overview", icon: <DashboardRounded /> },
-  { label: "Live Detection", icon: <VideocamRounded /> },
-  { label: "Formation Analysis", icon: <RadarRounded /> },
-  { label: "Tracking History", icon: <AnalyticsRounded /> },
-  { label: "Settings", icon: <SettingsRounded /> },
-];
-
-const formations = [
-  { name: "V Formation", description: "Two arms meeting at a leading point" },
-  { name: "Echelon", description: "Diagonal arrangement of drones" },
-  { name: "Column / File", description: "Drones arranged in a single file" },
-  { name: "Line / Abreast", description: "Drones arranged side by side" },
-  { name: "Diamond / Box", description: "Four-sided formation arrangement" },
-  { name: "Circle", description: "Drones arranged around a center" },
-];
-
-function App() {
-  const [selectedNav, setSelectedNav] = useState("Overview");
+export default function App() {
   const [connectionStatus, setConnectionStatus] = useState("checking");
-
-  const [selectedMedia, setSelectedMedia] = useState(null);
-const [previewUrl, setPreviewUrl] = useState("");
-const [mediaError, setMediaError] = useState("");
-const fileInputRef = useRef(null);
-
-const handleMediaChange = (event) => {
-  const file = event.target.files?.[0];
-
-  if (!file) return;
-
-  if (
-    !file.type.startsWith("image/") &&
-    !file.type.startsWith("video/")
-  ) {
-    setMediaError("Please select a valid image or video file.");
-    event.target.value = "";
-    return;
-  }
-
-  setMediaError("");
-  setSelectedMedia(file);
-  event.target.value = "";
-};
-
-useEffect(() => {
-  if (!selectedMedia) {
-    setPreviewUrl("");
-    return;
-  }
-
-  const url = URL.createObjectURL(selectedMedia);
-  setPreviewUrl(url);
-
-  return () => URL.revokeObjectURL(url);
-}, [selectedMedia]);
 
   useEffect(() => {
     let active = true;
-
-    async function checkBackend() {
+    const checkBackend = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://127.0.0.1:5000"}/health`
-        );
-
-        if (!response.ok) {
-          throw new Error("Backend health check failed");
-        }
-
-        const data = await response.json();
-
-        if (active) {
-          setConnectionStatus(
-            data.status === "ok" && data.aiService === "connected"
-              ? "connected"
-              : "degraded"
-          );
-        }
+        const response = await fetch(`${API}/health`);
+        const health = await response.json();
+        if (!response.ok) throw new Error("Health check failed");
+        if (active) setConnectionStatus(health.status === "ok" && health.aiService === "connected" ? "connected" : "degraded");
       } catch {
-        if (active) {
-          setConnectionStatus("disconnected");
-        }
+        if (active) setConnectionStatus("disconnected");
       }
-    }
-
-    checkBackend();
-
-    const intervalId = setInterval(checkBackend, 5000);
-
-    return () => {
-      active = false;
-      clearInterval(intervalId);
     };
+    checkBackend();
+    const timer = setInterval(checkBackend, 5000);
+    return () => { active = false; clearInterval(timer); };
   }, []);
+
+  const statusLabel = {
+    checking: "Checking services…",
+    connected: "AI service connected",
+    degraded: "AI service unavailable",
+    disconnected: "Backend disconnected",
+  }[connectionStatus];
 
   return (
     <Box className="app-shell">
       <CssBaseline />
-
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            boxSizing: "border-box",
-            borderRight: "1px solid #202b3b",
-            background: "#101827",
-            color: "#e5edf8",
-          },
-        }}
-      >
-        <Box className="brand">
-          <Box className="brand-icon">
+      <AppBar position="static" elevation={0} className="analyzer-topbar">
+        <Toolbar className="analyzer-toolbar">
+          <Box className="analyzer-brand">
             <RadarRounded />
-          </Box>
-          <Box>
-            <Typography className="brand-title">AEROSCAN</Typography>
-            <Typography className="brand-subtitle">
-              DRONE INTELLIGENCE
-            </Typography>
-          </Box>
-        </Box>
-
-        <Typography className="nav-heading">WORKSPACE</Typography>
-
-        <List className="navigation">
-          {navigation.map((item) => (
-            <ListItemButton
-              key={item.label}
-              selected={selectedNav === item.label}
-              onClick={() => setSelectedNav(item.label)}
-              className="nav-item"
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
-            </ListItemButton>
-          ))}
-        </List>
-
-        <Box className="sidebar-bottom">
-          <Box className="system-indicator">
-            <CircleRounded className="status-dot" />
             <Box>
-              <Typography className="system-label">System status</Typography>
-              <Typography className="system-value">Ready for input</Typography>
+              <Typography className="analyzer-brand-title">Drone Formation Analyzer</Typography>
+              <Typography className="analyzer-brand-caption">REAL MEDIA ANALYSIS</Typography>
             </Box>
           </Box>
-          <Typography className="sidebar-version">
-            DRONE FORMATION IDENTIFICATION
-          </Typography>
-          <Typography className="sidebar-version">Prototype v0.1.0</Typography>
-        </Box>
-      </Drawer>
-
-      <Box component="main" className="main-content">
-        <AppBar position="static" elevation={0} className="topbar">
-          <Toolbar className="topbar-toolbar">
-            <Box>
-              <Typography className="breadcrumb">
-                WORKSPACE / {selectedNav.toUpperCase()}
-              </Typography>
-              <Typography className="page-title">
-                {selectedNav}
-              </Typography>
-            </Box>
-
-            <Box className="topbar-actions">
-              <Chip
-                icon={<CircleRounded />}
-                label={
-                  connectionStatus === "checking"
-                    ? "Checking services..."
-                    : connectionStatus === "connected"
-                      ? "AI service connected"
-                      : connectionStatus === "degraded"
-                        ? "AI service issue"
-                        : "Backend disconnected"
-                }
-                className={`connection-chip ${connectionStatus}`}
-              />
-              <IconButton className="mobile-menu" aria-label="Menu">
-                <MenuRounded />
-              </IconButton>
-            </Box>
-          </Toolbar>
-        </AppBar>
-
-  <Box className="welcome-row">
-  <Box>
-    <Typography className="welcome-title">
-      Drone Formation Intelligence
-    </Typography>
-
-    <Typography className="welcome-description">
-      Detect, track, and classify coordinated drone formations from
-      images and videos.
-    </Typography>
-  </Box>
-
-  {/* Hidden file picker */}
-  <input
-    ref={fileInputRef}
-    type="file"
-    accept="image/*,video/*"
-    hidden
-    onChange={handleMediaChange}
-  />
-
-  {/* Upload button */}
-  <Button
-    variant="contained"
-    startIcon={<CloudUploadRounded />}
-    className="upload-button"
-    onClick={() => fileInputRef.current?.click()}
-  >
-    Upload Image / Video
-  </Button>
-</Box>
+          <Box className="analyzer-nav">
+            <Chip label="Real image & video" variant="outlined" className="mode-chip" />
+            <Chip icon={<CircleRounded />} label={statusLabel} className={`connection-chip ${connectionStatus}`} />
+          </Box>
+        </Toolbar>
+      </AppBar>
+      <Box component="main" className="analyzer-main">
+        <AnalyzerPage />
       </Box>
     </Box>
   );
 }
-
-export default App;
